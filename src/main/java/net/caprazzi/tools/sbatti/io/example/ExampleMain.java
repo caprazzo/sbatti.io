@@ -21,7 +21,7 @@ public class ExampleMain {
 		
 		// this calls the probe many times 
 		InterestingObjectGenerator generator 
-			= new InterestingObjectGenerator(probe, 2);
+			= new InterestingObjectGenerator(probe, 200000);
 		
 		
 		
