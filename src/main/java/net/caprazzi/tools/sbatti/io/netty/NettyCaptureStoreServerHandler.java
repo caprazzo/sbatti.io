@@ -34,6 +34,8 @@ public class NettyCaptureStoreServerHandler extends SimpleChannelUpstreamHandler
 		
 		Captured captured = (Captured) e.getMessage();
 		
+		System.out.println("Received " + captured);
+		
 		e.getChannel().write(CapturedReceipt.newBuilder()
 				.setId(captured.getId())
 				.setTimestamp(Instant.now().getMillis())

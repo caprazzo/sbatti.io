@@ -66,7 +66,7 @@ public class NettyCaptureStoreClient {
 		}
 	}
 
-	private CapturedReceipt send(Captured captured) {
+	public CapturedReceipt send(Captured captured) {
 		System.out.println("Sending " + captured);
 		return handler.sendCapture(captured);		
 	}

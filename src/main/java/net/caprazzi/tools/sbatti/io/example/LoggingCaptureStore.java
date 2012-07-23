@@ -39,4 +39,10 @@ public class LoggingCaptureStore<TData> implements CaptureStore<TData> {
 		
 	}
 
+	@Override
+	public void confirm(CaptureStoreReceipt<TData> receipt) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

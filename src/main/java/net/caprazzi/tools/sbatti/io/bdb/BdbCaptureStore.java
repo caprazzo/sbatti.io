@@ -1,12 +1,12 @@
 package net.caprazzi.tools.sbatti.io.bdb;
 
+import java.util.UUID;
 import java.util.concurrent.Callable;
 
 import net.caprazzi.tools.sbatti.io.CaptureStore;
 import net.caprazzi.tools.sbatti.io.CaptureStoreReceipt;
 import net.caprazzi.tools.sbatti.io.CapturedData;
 import net.caprazzi.tools.sbatti.io.IDataSerializer;
-import net.caprazzi.tools.sbatti.io.example.InterestingObject;
 
 import org.joda.time.Instant;
 
@@ -30,6 +30,7 @@ public class BdbCaptureStore<TData> implements CaptureStore<TData> {
 		return executor.submit(new Callable<CaptureStoreReceipt<TData>>() {
 			@Override
 			public CaptureStoreReceipt<TData> call() throws Exception {
+				// todo: get sender from the capture
 				dao.save(
 					sender, 
 					capture.getId(),
@@ -40,8 +41,10 @@ public class BdbCaptureStore<TData> implements CaptureStore<TData> {
 		});
 	}
 
-	public void delete(CaptureStoreReceipt<InterestingObject> receipt) {
-		System.out.println("Deleting confirmed receipt " + receipt);
+	@Override
+	public void confirm(CaptureStoreReceipt<TData> receipt) {
+		// TODO: get sender from the receipt
+		dao.markConfirmed("dbd-sender", receipt.getTimestamp(), receipt.getCapture().getId());		
 	}
 
 }

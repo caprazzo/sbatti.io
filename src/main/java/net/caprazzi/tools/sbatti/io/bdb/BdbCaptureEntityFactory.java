@@ -2,20 +2,11 @@ package net.caprazzi.tools.sbatti.io.bdb;
 
 import java.util.UUID;
 
-import net.caprazzi.tools.sbatti.io.CapturedData;
-import net.caprazzi.tools.sbatti.io.example.InterestingObject;
-
 import org.joda.time.Instant;
 
-public class BdbCaptureEntityFactory implements
-		CaptureEntityFactory<InterestingObject> {
-	@Override
-	public CapturedDataEntity forCapture(CapturedData<InterestingObject> capture) {
-		return new CapturedDataEntity(
-				capture.getId().toString(),
-				capture.getData().getId());
-	}
-
+//TODO: move to general implementation
+public class BdbCaptureEntityFactory implements CaptureEntityFactory {
+	
 	@Override
 	public CapturedDataEntity forCapture(UUID id, byte[] data) {
 		return new CapturedDataEntity(
@@ -38,6 +29,15 @@ public class BdbCaptureEntityFactory implements
 			id.toString(),
 			timestamp.getMillis(),
 			"stored-by",
+			sender);
+	}
+
+	@Override
+	public CaptureDataTagEntity confirmTag(String sender, UUID id, Instant timestamp) {
+		return new CaptureDataTagEntity(
+			id.toString(),
+			timestamp.getMillis(),
+			"copy-confirmed",
 			sender);
 	}
 }
