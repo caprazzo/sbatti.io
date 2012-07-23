@@ -16,6 +16,9 @@ local.properties
 .settings/
 .loadpath
 
+example-bdb-db/
+target/
+
 # External tool builders
 .externalToolBuilders/
 
