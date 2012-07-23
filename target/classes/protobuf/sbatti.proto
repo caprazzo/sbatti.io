@@ -1,0 +1,20 @@
+package learn;
+
+option java_package = "net.caprazzi.tools.sbatti.io";
+option java_outer_classname = "Capture";
+
+message Captured {
+	required string id = 1;
+	required string sender = 2;
+	required fixed64 timestamp = 3;
+	required bytes data = 4;
+}
+
+message CapturedReceipt {
+	required string id = 1;
+	required string sender = 2;
+	required fixed64 timestamp = 3;
+	required bool success = 4;
+	optional string message = 5;
+}
+
