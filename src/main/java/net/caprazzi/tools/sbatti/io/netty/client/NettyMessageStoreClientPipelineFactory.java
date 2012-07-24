@@ -1,6 +1,7 @@
-package net.caprazzi.tools.sbatti.io.netty;
+package net.caprazzi.tools.sbatti.io.netty.client;
 
 import net.caprazzi.tools.sbatti.io.Capture;
+import net.caprazzi.tools.sbatti.io.netty.SimpleNettyReconnectStrategy;
 
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
@@ -10,16 +11,14 @@ import org.jboss.netty.handler.codec.protobuf.ProtobufDecoder;
 import org.jboss.netty.handler.codec.protobuf.ProtobufEncoder;
 import org.jboss.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
 import org.jboss.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
-import org.jboss.netty.util.HashedWheelTimer;
-import org.jboss.netty.util.Timer;
 
-public class NettyCaptureStoreClientPipelineFactory implements ChannelPipelineFactory {
+public class NettyMessageStoreClientPipelineFactory implements ChannelPipelineFactory {
 
 	private ClientBootstrap bootstrap;
-	private NettyCaptureStoreReconnectStrategy strategy;
-	private NettyCaptureStoreClient client;
+	private SimpleNettyReconnectStrategy strategy;
+	private NettyMessageStoreClient client;
 
-	public NettyCaptureStoreClientPipelineFactory(ClientBootstrap bootstrap, NettyCaptureStoreReconnectStrategy strategy, NettyCaptureStoreClient nettyCaptureStoreClient) {
+	public NettyMessageStoreClientPipelineFactory(ClientBootstrap bootstrap, SimpleNettyReconnectStrategy strategy, NettyMessageStoreClient nettyCaptureStoreClient) {
 		this.bootstrap = bootstrap;
 		this.strategy = strategy;
 		this.client = nettyCaptureStoreClient;		
@@ -35,7 +34,11 @@ public class NettyCaptureStoreClientPipelineFactory implements ChannelPipelineFa
 		p.addLast("frameEncoder", new ProtobufVarint32LengthFieldPrepender());
 		p.addLast("protobufEncoder", new ProtobufEncoder());
 		
-		p.addLast("handler", new NettyCaptureStoreClientHandler(bootstrap, strategy.newInstance(), client));
+		NettyMessageStoreClientHandler handler 
+			= new NettyMessageStoreClientHandler(bootstrap, strategy.newInstance());
+		
+		client.setHandler(handler);
+		p.addLast("handler", handler);
 		
 		return p;
 	}

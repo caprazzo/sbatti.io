@@ -1,4 +1,4 @@
-package net.caprazzi.tools.sbatti.io.netty;
+package net.caprazzi.tools.sbatti.io.netty.client;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.BlockingQueue;
@@ -7,6 +7,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import net.caprazzi.tools.sbatti.io.Capture.Captured;
 import net.caprazzi.tools.sbatti.io.Capture.CapturedReceipt;
 import net.caprazzi.tools.sbatti.io.core.logging.Log;
+import net.caprazzi.tools.sbatti.io.netty.SimpleNettyReconnectStrategy;
 
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.Channel;
@@ -16,17 +17,15 @@ import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
-import org.jboss.netty.util.Timer;
 
-public class NettyCaptureStoreClientHandler extends
+public class NettyMessageStoreClientHandler extends
 		SimpleChannelUpstreamHandler {
 
 	private static final Log log = Log
-			.forClass(NettyCaptureStoreClientHandler.class);
+			.forClass(NettyMessageStoreClientHandler.class);
 
 	private volatile Channel channel;
 
-	// TODO: should be capturedReceipt
 	private final BlockingQueue<CapturedReceipt> answer 
 		= new LinkedBlockingQueue<CapturedReceipt>();
 
@@ -34,15 +33,11 @@ public class NettyCaptureStoreClientHandler extends
 
 	private long startTime = -1;
 
-	private NettyCaptureStoreReconnectStrategy strategy;
+	private SimpleNettyReconnectStrategy strategy;
 
-	private NettyCaptureStoreClient client;
-
-	public NettyCaptureStoreClientHandler(ClientBootstrap bootstrap, NettyCaptureStoreReconnectStrategy strategy, NettyCaptureStoreClient client) {
+	public NettyMessageStoreClientHandler(ClientBootstrap bootstrap, SimpleNettyReconnectStrategy strategy) {
 		this.bootstrap = bootstrap;
 		this.strategy = strategy;
-		this.client = client;
-		client.setHandler(this);
 	}
 
 	InetSocketAddress getRemoteAddress() {

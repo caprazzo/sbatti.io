@@ -1,10 +1,11 @@
-package net.caprazzi.tools.sbatti.io.netty;
+package net.caprazzi.tools.sbatti.io.netty.server;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.caprazzi.tools.sbatti.io.Capture.Captured;
 import net.caprazzi.tools.sbatti.io.Capture.CapturedReceipt;
+import net.caprazzi.tools.sbatti.io.netty.client.NettyMessageStoreClientHandler;
 
 import org.jboss.netty.channel.ChannelEvent;
 import org.jboss.netty.channel.ChannelHandlerContext;
@@ -14,10 +15,10 @@ import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 import org.joda.time.Instant;
 
-public class NettyCaptureStoreServerHandler extends SimpleChannelUpstreamHandler {
+public class NettyMessageStoreServerHandler extends SimpleChannelUpstreamHandler {
 
 	private static final Logger Log = Logger
-			.getLogger(NettyCaptureStoreClientHandler.class.getName());
+			.getLogger(NettyMessageStoreClientHandler.class.getName());
 	
 	@Override
 	public void handleUpstream(ChannelHandlerContext ctx, ChannelEvent e)

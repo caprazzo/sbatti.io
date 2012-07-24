@@ -2,18 +2,18 @@ package net.caprazzi.tools.sbatti.io.bdb;
 
 import java.util.concurrent.Callable;
 
-import net.caprazzi.tools.sbatti.io.CaptureStore;
-import net.caprazzi.tools.sbatti.io.CaptureStoreReceipt;
-import net.caprazzi.tools.sbatti.io.CapturedData;
 import net.caprazzi.tools.sbatti.io.IDataSerializer;
 import net.caprazzi.tools.sbatti.io.core.logging.Log;
+import net.caprazzi.tools.sbatti.io.messageQueue.DataMessage;
+import net.caprazzi.tools.sbatti.io.messageQueue.DataMessageReceipt;
+import net.caprazzi.tools.sbatti.io.messageQueue.DataMessageStore;
 
 import org.joda.time.Instant;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 
-public class BdbCaptureStore<TData> implements CaptureStore<TData> {
+public class BdbCaptureStore<TData> implements DataMessageStore<TData> {
 	
 	private static final Log log = Log
 			.forClass(BdbCaptureStore.class);
@@ -29,13 +29,13 @@ public class BdbCaptureStore<TData> implements CaptureStore<TData> {
 	}
 	
 	@Override
-	public ListenableFuture<CaptureStoreReceipt> store(final String sender, final CapturedData<TData> capture) {
+	public ListenableFuture<DataMessageReceipt> store(final String sender, final DataMessage<TData> capture) {
 		
 		log.debug("{}: Storing to {} (from {})", capture.getId(), dao, sender);		
 		
-		return executor.submit(new Callable<CaptureStoreReceipt>() {
+		return executor.submit(new Callable<DataMessageReceipt>() {
 			@Override
-			public CaptureStoreReceipt call() throws Exception {
+			public DataMessageReceipt call() throws Exception {
 				// TODO: get sender from the capture
 				dao.save(
 					sender, 
@@ -43,8 +43,8 @@ public class BdbCaptureStore<TData> implements CaptureStore<TData> {
 					capture.getTimestamp(), 
 					serializer.serialize(capture.getData()));
 				
-				CaptureStoreReceipt receipt
-					= CaptureStoreReceipt.forSuccess(capture.getId(), Instant.now(), "Saved in " + dao);
+				DataMessageReceipt receipt
+					= DataMessageReceipt.forSuccess(capture.getId(), Instant.now(), "Saved in " + dao);
 				
 				log.debug("{}: {} while storing to {}", receipt.getCaptureId(), receipt.isSuccess() ? "" + "SUCCESS" : "FAILURE", dao);
 				
@@ -54,7 +54,7 @@ public class BdbCaptureStore<TData> implements CaptureStore<TData> {
 	}
 
 	@Override
-	public void confirm(CaptureStoreReceipt receipt) {
+	public void confirm(DataMessageReceipt receipt) {
 		log.debug("{}: Confirmed by {}", receipt.getCaptureId(), "TODO-SENDER");
 		dao.confirm(receipt.getCaptureId());		
 	}

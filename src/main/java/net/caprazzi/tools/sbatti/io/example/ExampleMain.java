@@ -4,7 +4,6 @@ import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import net.caprazzi.tools.sbatti.io.CaptureStoreReceipt;
 import net.caprazzi.tools.sbatti.io.IDataSerializer;
 import net.caprazzi.tools.sbatti.io.QueueingDataProbe;
 import net.caprazzi.tools.sbatti.io.QueueingDataProbeStoreConsumer;
@@ -13,8 +12,8 @@ import net.caprazzi.tools.sbatti.io.StoreEventListener;
 import net.caprazzi.tools.sbatti.io.bdb.BdbCaptureEnvironment;
 import net.caprazzi.tools.sbatti.io.bdb.BdbCaptureStore;
 import net.caprazzi.tools.sbatti.io.bdb.BdbStoreFactory;
-import net.caprazzi.tools.sbatti.io.bdb.BdbUndeliveredScanner;
-import net.caprazzi.tools.sbatti.io.netty.NettyCaptureStore;
+import net.caprazzi.tools.sbatti.io.messageQueue.DataMessageReceipt;
+import net.caprazzi.tools.sbatti.io.netty.client.NettyMessageStore;
 
 public class ExampleMain {
 
@@ -48,7 +47,7 @@ public class ExampleMain {
 			= BdbStoreFactory.newBdbStore(env, serializer, recovery);		
 		
 		// create a remote network based store
-		NettyCaptureStore<InterestingObject> netStore 
+		NettyMessageStore<InterestingObject> netStore 
 			= NettyStoreFactory.newNettyStore(
 					InetAddress.getLocalHost(), 3333,
 					serializer);
@@ -60,7 +59,7 @@ public class ExampleMain {
 		recoveryConsumer.addListener(new StoreEventListener() {
 			
 			@Override
-			public void onComplete(CaptureStoreReceipt receipt) {
+			public void onComplete(DataMessageReceipt receipt) {
 				if (receipt.isSuccess()) {
 					bdbStore.confirm(receipt);
 				}

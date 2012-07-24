@@ -11,10 +11,10 @@ import org.jboss.netty.util.Timeout;
 import org.jboss.netty.util.Timer;
 import org.jboss.netty.util.TimerTask;
 
-public class NettyCaptureStoreReconnectStrategy {
+public class SimpleNettyReconnectStrategy {
 
 	private static final Log log = Log
-			.forClass(NettyCaptureStoreReconnectStrategy.class);
+			.forClass(SimpleNettyReconnectStrategy.class);
 	
 	private Timer timer = new HashedWheelTimer();
 	private int reconnectDelay;
@@ -24,13 +24,13 @@ public class NettyCaptureStoreReconnectStrategy {
 		return (InetSocketAddress) bootstrap.getOption("remoteAddress");
 	}
 	
-	public NettyCaptureStoreReconnectStrategy(int reconnectDelay, TimeUnit reconnectUnit) {
+	public SimpleNettyReconnectStrategy(int reconnectDelay, TimeUnit reconnectUnit) {
 		this.reconnectUnit = reconnectUnit;
 		this.reconnectDelay = reconnectDelay;
 	}
 
-	public NettyCaptureStoreReconnectStrategy newInstance() {
-		return new NettyCaptureStoreReconnectStrategy(reconnectDelay, reconnectUnit);
+	public SimpleNettyReconnectStrategy newInstance() {
+		return new SimpleNettyReconnectStrategy(reconnectDelay, reconnectUnit);
 	}
 
 	public void handleChannelClosed(final ClientBootstrap bootstrap) {

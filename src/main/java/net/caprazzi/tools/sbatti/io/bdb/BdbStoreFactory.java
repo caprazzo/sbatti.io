@@ -2,7 +2,7 @@ package net.caprazzi.tools.sbatti.io.bdb;
 
 import java.util.concurrent.Executors;
 
-import net.caprazzi.tools.sbatti.io.IDataProbe;
+import net.caprazzi.tools.sbatti.io.MessageCollector;
 import net.caprazzi.tools.sbatti.io.IDataSerializer;
 import net.caprazzi.tools.sbatti.io.core.BdbRetryDataProbe;
 
@@ -11,7 +11,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 
 public class BdbStoreFactory {
 
-	public static <TData> BdbCaptureStore<TData> newBdbStore(BdbCaptureEnvironment env, IDataSerializer<TData> serializer, IDataProbe<TData> undeliveredProbe) {
+	public static <TData> BdbCaptureStore<TData> newBdbStore(BdbCaptureEnvironment env, IDataSerializer<TData> serializer, MessageCollector<TData> undeliveredProbe) {
 		
 		CaptureEntityFactory factory 
 			= new BdbCaptureEntityFactory();

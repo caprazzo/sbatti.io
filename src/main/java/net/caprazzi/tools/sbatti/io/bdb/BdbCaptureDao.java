@@ -4,7 +4,7 @@ import java.util.UUID;
 
 import net.caprazzi.tools.sbatti.io.core.BdbRetryDataProbe;
 import net.caprazzi.tools.sbatti.io.core.logging.Log;
-import net.caprazzi.tools.sbatti.io.netty.NettyCaptureStore;
+import net.caprazzi.tools.sbatti.io.netty.client.NettyMessageStore;
 
 import org.joda.time.Instant;
 

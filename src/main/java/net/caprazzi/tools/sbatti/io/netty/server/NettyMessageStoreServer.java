@@ -1,4 +1,4 @@
-package net.caprazzi.tools.sbatti.io.netty;
+package net.caprazzi.tools.sbatti.io.netty.server;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
@@ -6,11 +6,11 @@ import java.util.concurrent.Executors;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 
-public class NettyCaptureStoreServer {
+public class NettyMessageStoreServer {
 
 	private int port;
 	
-	public NettyCaptureStoreServer(int port) {
+	public NettyMessageStoreServer(int port) {
 		this.port = port;		
 	}	
 
@@ -21,14 +21,14 @@ public class NettyCaptureStoreServer {
 						Executors.newCachedThreadPool()));
 
 		// Set up the event pipeline factory.
-		bootstrap.setPipelineFactory(new NettyCaptureStoreServerPipelineFactory());
+		bootstrap.setPipelineFactory(new NettyMessageStoreServerPipelineFactory());
 
 		// Bind and start to accept incoming connections.
 		bootstrap.bind(new InetSocketAddress(port));
 	}
 	
 	public static void main(String[] args) {
-		NettyCaptureStoreServer server = new NettyCaptureStoreServer(3333);
+		NettyMessageStoreServer server = new NettyMessageStoreServer(3333);
 		server.start();
 	}
 

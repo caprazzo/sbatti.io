@@ -1,4 +1,4 @@
-package net.caprazzi.tools.sbatti.io.netty;
+package net.caprazzi.tools.sbatti.io.netty.client;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -8,19 +8,24 @@ import java.util.concurrent.TimeUnit;
 import net.caprazzi.tools.sbatti.io.Capture.Captured;
 import net.caprazzi.tools.sbatti.io.Capture.CapturedReceipt;
 import net.caprazzi.tools.sbatti.io.core.logging.Log;
+import net.caprazzi.tools.sbatti.io.netty.SimpleNettyReconnectStrategy;
 
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 
-public class NettyCaptureStoreClient {
+/**
+ * Client to the NettyMessageStoreServer. 
+ * This tries forever to reconnect to the given host and port.
+ */
+public class NettyMessageStoreClient {
 
-	private static final Log log = Log.forClass(NettyCaptureStoreClient.class);
+	private static final Log log = Log.forClass(NettyMessageStoreClient.class);
 
 	private InetSocketAddress address;
 
-	private NettyCaptureStoreClientHandler handler;
+	private NettyMessageStoreClientHandler handler;
 
-	public NettyCaptureStoreClient(InetAddress host, int port) {		
+	public NettyMessageStoreClient(InetAddress host, int port) {		
 		address = new InetSocketAddress(host, port);	
 	}
 
@@ -32,15 +37,14 @@ public class NettyCaptureStoreClient {
 				Executors.newCachedThreadPool(),
 				Executors.newCachedThreadPool()));
 
-		NettyCaptureStoreReconnectStrategy strategy 
-			= new NettyCaptureStoreReconnectStrategy(5, TimeUnit.SECONDS);
+		SimpleNettyReconnectStrategy strategy 
+			= new SimpleNettyReconnectStrategy(5, TimeUnit.SECONDS);
 		
 		bootstrap.setPipelineFactory(
-			new NettyCaptureStoreClientPipelineFactory(
+			new NettyMessageStoreClientPipelineFactory(
 					bootstrap, 
 					strategy,
 					this));
-
 			
 		bootstrap.setOption("remoteAddress", address);		
 		
@@ -69,7 +73,7 @@ public class NettyCaptureStoreClient {
 	}
 
 	public void setHandler(
-			NettyCaptureStoreClientHandler handler) {
+			NettyMessageStoreClientHandler handler) {
 				this.handler = handler;
 		
 	}

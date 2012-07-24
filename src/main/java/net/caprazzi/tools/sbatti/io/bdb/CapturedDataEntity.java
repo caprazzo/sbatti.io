@@ -5,9 +5,9 @@ import java.util.UUID;
 import org.joda.time.DateTime;
 import org.joda.time.Instant;
 
-import net.caprazzi.tools.sbatti.io.CapturedData;
 import net.caprazzi.tools.sbatti.io.IDataSerializer;
 import net.caprazzi.tools.sbatti.io.example.InterestingObjectDataSerizlier.DataSerializationException;
+import net.caprazzi.tools.sbatti.io.messageQueue.DataMessage;
 
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
@@ -60,9 +60,9 @@ public class CapturedDataEntity {
 		return status;
 	}
 	
-	public static <TData> CapturedData<TData> toCapture(IDataSerializer<TData> serializer, CapturedDataEntity entity) {
+	public static <TData> DataMessage<TData> toCapture(IDataSerializer<TData> serializer, CapturedDataEntity entity) {
 		try {
-			return CapturedData.forData(UUID.fromString(entity.captureId), Instant.now(), serializer.parse((byte[])entity.getData()));
+			return DataMessage.forData(UUID.fromString(entity.captureId), Instant.now(), serializer.parse((byte[])entity.getData()));
 		} catch (DataSerializationException e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);

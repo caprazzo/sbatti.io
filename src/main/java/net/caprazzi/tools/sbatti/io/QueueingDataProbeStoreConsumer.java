@@ -2,6 +2,10 @@ package net.caprazzi.tools.sbatti.io;
 
 import java.util.concurrent.BlockingQueue;
 
+import net.caprazzi.tools.sbatti.io.messageQueue.DataMessage;
+import net.caprazzi.tools.sbatti.io.messageQueue.DataMessageReceipt;
+import net.caprazzi.tools.sbatti.io.messageQueue.DataMessageStore;
+
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -13,12 +17,12 @@ public class QueueingDataProbeStoreConsumer<TData> {
 	}
 	
 	private QueueingDataProbe<TData> probe;
-	private CaptureStore<TData> store;	
-	private BlockingQueue<CapturedData<TData>> queue;
+	private DataMessageStore<TData> store;	
+	private BlockingQueue<DataMessage<TData>> queue;
 	private volatile boolean stopping;
 	private StoreEventListener listener;
 
-	public QueueingDataProbeStoreConsumer(QueueingDataProbe<TData> probe, CaptureStore<TData> store) {
+	public QueueingDataProbeStoreConsumer(QueueingDataProbe<TData> probe, DataMessageStore<TData> store) {
 		this.probe = probe;
 		this.queue = probe.getQueue();
 		this.store = store;
@@ -34,14 +38,14 @@ public class QueueingDataProbeStoreConsumer<TData> {
 			public void run() {
 				while (!stopping) {					
 					try {
-						CapturedData<TData> capture = queue.take();
-						ListenableFuture<CaptureStoreReceipt> tryStore 
+						DataMessage<TData> capture = queue.take();
+						ListenableFuture<DataMessageReceipt> tryStore 
 							= store.store(probe.toString(), capture);			
 												
 						Futures.addCallback(tryStore, new ReceiptCallback() {
 							
 							@Override
-							public void onComplete(CaptureStoreReceipt receipt) {
+							public void onComplete(DataMessageReceipt receipt) {
 								if (listener != null)
 									listener.onComplete(receipt);
 							}

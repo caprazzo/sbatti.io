@@ -3,9 +3,9 @@ package net.caprazzi.tools.sbatti.io.example;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 
-import net.caprazzi.tools.sbatti.io.CaptureStore;
-import net.caprazzi.tools.sbatti.io.CaptureStoreReceipt;
-import net.caprazzi.tools.sbatti.io.CapturedData;
+import net.caprazzi.tools.sbatti.io.messageQueue.DataMessage;
+import net.caprazzi.tools.sbatti.io.messageQueue.DataMessageReceipt;
+import net.caprazzi.tools.sbatti.io.messageQueue.DataMessageStore;
 
 import org.joda.time.Instant;
 
@@ -13,7 +13,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 
-public class LoggingCaptureStore<TData> implements CaptureStore<TData> {
+public class LoggingCaptureStore<TData> implements DataMessageStore<TData> {
 
 	
 	private static ListeningExecutorService service 
@@ -25,22 +25,22 @@ public class LoggingCaptureStore<TData> implements CaptureStore<TData> {
 	}
 
 	@Override
-	public ListenableFuture<CaptureStoreReceipt> store(final String sender, final CapturedData<TData> capture) {
+	public ListenableFuture<DataMessageReceipt> store(final String sender, final DataMessage<TData> capture) {
 
 		
-		return service.submit(new Callable<CaptureStoreReceipt>() {
+		return service.submit(new Callable<DataMessageReceipt>() {
 
 			@Override
-			public CaptureStoreReceipt call() throws Exception {
+			public DataMessageReceipt call() throws Exception {
 				System.out.println(loggerName + " Stored capture " + capture);
-				return CaptureStoreReceipt.forSuccess(capture.getId(), Instant.now(), "Logged");
+				return DataMessageReceipt.forSuccess(capture.getId(), Instant.now(), "Logged");
 			}
 		});
 		
 	}
 
 	@Override
-	public void confirm(CaptureStoreReceipt receipt) {
+	public void confirm(DataMessageReceipt receipt) {
 		// TODO Auto-generated method stub
 		
 	}
