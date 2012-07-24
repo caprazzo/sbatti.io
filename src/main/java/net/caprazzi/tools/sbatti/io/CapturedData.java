@@ -2,6 +2,8 @@ package net.caprazzi.tools.sbatti.io;
 
 import java.util.UUID;
 
+import net.caprazzi.tools.sbatti.io.bdb.CapturedDataEntity;
+
 import org.joda.time.DateTime;
 import org.joda.time.Instant;
 
@@ -19,6 +21,10 @@ public class CapturedData<TData> {
 	
 	public static <TData> CapturedData<TData> forData(TData data) {
 		return new CapturedData<TData>(UUID.randomUUID(), new DateTime().toInstant(), data);
+	}
+	
+	public static <TData> CapturedData<TData> forData(UUID id, Instant timestamp, TData data) {
+		return new CapturedData<TData>(id, timestamp, data);
 	}
 	
 	public UUID getId() {

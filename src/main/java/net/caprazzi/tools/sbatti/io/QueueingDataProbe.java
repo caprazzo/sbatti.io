@@ -7,11 +7,17 @@ public class QueueingDataProbe<TData> implements IDataProbe<TData> {
 
 	private final BlockingQueue<CapturedData<TData>> queue
 		= new LinkedBlockingQueue<CapturedData<TData>>();
+	
+	private String name;
 		
+	public QueueingDataProbe(String name) {
+		this.name = name;
+	}
+	
 	@Override
-	public void capture(TData data) {
+	public void capture(CapturedData<TData> capture) {
 		try {
-			queue.put(CapturedData.forData(data));
+			queue.put(capture);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -20,6 +26,11 @@ public class QueueingDataProbe<TData> implements IDataProbe<TData> {
 
 	public BlockingQueue<CapturedData<TData>> getQueue() {
 		return queue;
+	}
+	
+	@Override
+	public String toString() {
+		return "QDP:" + name;
 	}
 	
 }

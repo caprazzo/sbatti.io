@@ -25,22 +25,22 @@ public class LoggingCaptureStore<TData> implements CaptureStore<TData> {
 	}
 
 	@Override
-	public ListenableFuture<CaptureStoreReceipt<TData>> store(final String sender, final CapturedData<TData> capture) {
+	public ListenableFuture<CaptureStoreReceipt> store(final String sender, final CapturedData<TData> capture) {
 
 		
-		return service.submit(new Callable<CaptureStoreReceipt<TData>>() {
+		return service.submit(new Callable<CaptureStoreReceipt>() {
 
 			@Override
-			public CaptureStoreReceipt<TData> call() throws Exception {
+			public CaptureStoreReceipt call() throws Exception {
 				System.out.println(loggerName + " Stored capture " + capture);
-				return CaptureStoreReceipt.forSuccess(Instant.now(), capture);
+				return CaptureStoreReceipt.forSuccess(capture.getId(), Instant.now(), "Logged");
 			}
 		});
 		
 	}
 
 	@Override
-	public void confirm(CaptureStoreReceipt<TData> receipt) {
+	public void confirm(CaptureStoreReceipt receipt) {
 		// TODO Auto-generated method stub
 		
 	}

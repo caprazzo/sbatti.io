@@ -4,9 +4,9 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 public interface CaptureStore<TData> {
 
-	public ListenableFuture<CaptureStoreReceipt<TData>> store(String sender, CapturedData<TData> capture);
+	public ListenableFuture<CaptureStoreReceipt> store(String sender, CapturedData<TData> capture);
 
 	//TODO: move this to ConfirmableCaptureStore ?
-	public void confirm(CaptureStoreReceipt<TData> receipt);
+	public void confirm(CaptureStoreReceipt receipt);	
 	
 }

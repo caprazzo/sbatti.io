@@ -11,33 +11,19 @@ public class BdbCaptureEntityFactory implements CaptureEntityFactory {
 	public CapturedDataEntity forCapture(UUID id, byte[] data) {
 		return new CapturedDataEntity(
 			id.toString(),
+			CaptureStatus.UNDELIVERED,
+			Instant.now().getMillis(),
 			data);
 	}
 
 	@Override
-	public CaptureDataTagEntity captureTag(String sender, UUID id, Instant timestamp) {
-		return new CaptureDataTagEntity(
-			id.toString(),
-			timestamp.getMillis(),
-			"captured-by",
-			sender);
+	public CapturedDataEntity forConfirmed(UUID captureId) {
+		return new CapturedDataEntity(
+			captureId.toString(),
+			CaptureStatus.DELIVERED,
+			Instant.now().getMillis(),
+			null);
 	}
 
-	@Override
-	public CaptureDataTagEntity storeTag(String sender, UUID id, Instant timestamp) {
-		return new CaptureDataTagEntity(
-			id.toString(),
-			timestamp.getMillis(),
-			"stored-by",
-			sender);
-	}
 
-	@Override
-	public CaptureDataTagEntity confirmTag(String sender, UUID id, Instant timestamp) {
-		return new CaptureDataTagEntity(
-			id.toString(),
-			timestamp.getMillis(),
-			"copy-confirmed",
-			sender);
-	}
 }

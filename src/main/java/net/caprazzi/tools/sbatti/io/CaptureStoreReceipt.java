@@ -1,25 +1,47 @@
 package net.caprazzi.tools.sbatti.io;
 
+import java.util.UUID;
+
 import org.joda.time.Instant;
 
-public class CaptureStoreReceipt<TData> {
+public class CaptureStoreReceipt {
 
-	private final CapturedData<TData> capture;
 	private final boolean success;
 	private final Instant timestamp;
+	private final UUID captureId;
+	private final String message;
+	private final Throwable cause;
 
-	private CaptureStoreReceipt(boolean success, Instant timestamp, CapturedData<TData> capture) {
+	private CaptureStoreReceipt(UUID captureId, Instant timestamp, boolean success, String message, Throwable cause) {
+		this.captureId = captureId;
 		this.success = success;
 		this.timestamp = timestamp;
-		this.capture = capture;
+		this.message = message;
+		this.cause = cause;
+	}
+
+	public static CaptureStoreReceipt forSuccess(UUID captureId, Instant timestamp, String message) {
+		return new CaptureStoreReceipt(captureId, timestamp, true, message, null);
 	}
 	
-	public static <TData> CaptureStoreReceipt<TData> forSuccess(Instant timestamp, CapturedData<TData> capture) {
-		return new CaptureStoreReceipt<TData>(true, timestamp, capture);
+	public static CaptureStoreReceipt forFailure(UUID captureId, Instant timestamp, String message) {
+		return new CaptureStoreReceipt(captureId, timestamp, false, message, null);
 	}
 	
-	public CapturedData<TData> getCapture() {
-		return capture;
+	public static CaptureStoreReceipt forFailure(Throwable t) {
+		return new CaptureStoreReceipt(null, Instant.now(), false, t.getMessage(), t);
+	}
+	
+	public UUID getCaptureId() {
+		return captureId;
+	}
+	
+	public String getMessage() {
+		return message;
+	}
+	
+	public Throwable getCause() {
+		return cause;
 	}
 	
 	public boolean isSuccess() {
@@ -29,5 +51,12 @@ public class CaptureStoreReceipt<TData> {
 	public Instant getTimestamp() {
 		return timestamp;
 	}
+	
+	@Override
+	public String toString() {
+		return this.getClass().getSimpleName() + "(" + captureId + "," + isSuccess() + ", " + getTimestamp() + ", " + getMessage() + ", " + getCause() + ")";
+	}
+
+	
 
 }

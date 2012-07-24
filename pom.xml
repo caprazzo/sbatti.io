@@ -6,6 +6,12 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Sbatti.IO</name>
 	<description>Simple Java networking tools</description>
+	
+	
+	<properties>
+	   <slf4j.version>1.6.6</slf4j.version>
+       <logback.version>1.0.6</logback.version>
+    </properties>
 
 	<repositories>
 		<repository>
@@ -15,7 +21,6 @@
 	</repositories>
 	
 	<dependencies>
-	
 		<dependency>
 			<groupId>joda-time</groupId>
 			<artifactId>joda-time</artifactId>
@@ -65,6 +70,33 @@
 			<version>1.8.5</version>
 			<scope>test</scope>
 		</dependency>
+		
+		<!-- logging -->
+		<dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jul-to-slf4j</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>log4j-over-slf4j</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
 		
 	</dependencies>
 	

@@ -1,5 +1,6 @@
 package net.caprazzi.tools.sbatti.io.example;
 
+import net.caprazzi.tools.sbatti.io.CapturedData;
 import net.caprazzi.tools.sbatti.io.IDataProbe;
 
 import com.google.common.collect.ContiguousSet;
@@ -26,7 +27,7 @@ public class InterestingObjectGenerator {
 						.asSet(DiscreteDomains.integers());
 				
 				for (int r : set) {			
-					probe.capture(InterestingObject.newObject());			
+					probe.capture(CapturedData.forData(InterestingObject.fromInt(r)));		
 				}				
 			}
 			

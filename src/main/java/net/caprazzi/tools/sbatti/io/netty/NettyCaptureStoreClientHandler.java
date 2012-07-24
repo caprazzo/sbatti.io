@@ -1,13 +1,14 @@
 package net.caprazzi.tools.sbatti.io.netty;
 
+import java.net.InetSocketAddress;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import net.caprazzi.tools.sbatti.io.Capture.Captured;
 import net.caprazzi.tools.sbatti.io.Capture.CapturedReceipt;
+import net.caprazzi.tools.sbatti.io.core.logging.Log;
 
+import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelEvent;
 import org.jboss.netty.channel.ChannelHandlerContext;
@@ -15,16 +16,38 @@ import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
+import org.jboss.netty.util.Timer;
 
-public class NettyCaptureStoreClientHandler extends SimpleChannelUpstreamHandler {
+public class NettyCaptureStoreClientHandler extends
+		SimpleChannelUpstreamHandler {
 
-	private static final Logger Log = Logger
-			.getLogger(NettyCaptureStoreClientHandler.class.getName());
+	private static final Log log = Log
+			.forClass(NettyCaptureStoreClientHandler.class);
 
 	private volatile Channel channel;
 
 	// TODO: should be capturedReceipt
-	private final BlockingQueue<CapturedReceipt> answer = new LinkedBlockingQueue<CapturedReceipt>();
+	private final BlockingQueue<CapturedReceipt> answer 
+		= new LinkedBlockingQueue<CapturedReceipt>();
+
+	private ClientBootstrap bootstrap;
+
+	private long startTime = -1;
+
+	private NettyCaptureStoreReconnectStrategy strategy;
+
+	private NettyCaptureStoreClient client;
+
+	public NettyCaptureStoreClientHandler(ClientBootstrap bootstrap, NettyCaptureStoreReconnectStrategy strategy, NettyCaptureStoreClient client) {
+		this.bootstrap = bootstrap;
+		this.strategy = strategy;
+		this.client = client;
+		client.setHandler(this);
+	}
+
+	InetSocketAddress getRemoteAddress() {
+		return (InetSocketAddress) bootstrap.getOption("remoteAddress");
+	}
 
 	public CapturedReceipt sendCapture(Captured captured) {
 		channel.write(captured);
@@ -49,7 +72,7 @@ public class NettyCaptureStoreClientHandler extends SimpleChannelUpstreamHandler
 	public void handleUpstream(ChannelHandlerContext ctx, ChannelEvent e)
 			throws Exception {
 		if (e instanceof ChannelStateEvent) {
-			Log.info(e.toString());
+			log.info(e.toString());
 		}
 		super.handleUpstream(ctx, e);
 	}
@@ -57,8 +80,31 @@ public class NettyCaptureStoreClientHandler extends SimpleChannelUpstreamHandler
 	@Override
 	public void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent e)
 			throws Exception {
+		
 		channel = e.getChannel();
+		log.info("Channel open:{}", channel);
 		super.channelOpen(ctx, e);
+	}
+
+	@Override
+	public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
+		log.warn("Disconnected from: " + getRemoteAddress());
+		e.getChannel().close();
+	}
+	
+	@Override
+	public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
+		if (startTime < 0) {
+			startTime = System.currentTimeMillis();
+		}
+		log.info("Connected to: " + getRemoteAddress());
+	}
+
+	@Override
+	public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e)
+			throws Exception {
+		log.info("Disconnected");		
+		strategy.handleChannelClosed(bootstrap);				
 	}
 
 	@Override
@@ -69,9 +115,12 @@ public class NettyCaptureStoreClientHandler extends SimpleChannelUpstreamHandler
 
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) {
-		Log.log(Level.WARNING, "Unexpected exception from downstream.",
-				e.getCause());
+		log.warn("Unexpected exception from downstream.", e.getCause());
 		e.getChannel().close();
+	}
+
+	public boolean isConnected() {
+		return channel != null && channel.isConnected();
 	}
 
 }

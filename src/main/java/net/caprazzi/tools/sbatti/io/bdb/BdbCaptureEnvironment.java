@@ -25,6 +25,9 @@ public class BdbCaptureEnvironment {
         // they do not exist.
         myEnvConfig.setAllowCreate(true);
         storeConfig.setAllowCreate(true);
+        
+        myEnvConfig.setTransactional(true);
+        storeConfig.setTransactional(true);
 
         // Open the environment and entity store
         storeEnv = new Environment(envHome, myEnvConfig);

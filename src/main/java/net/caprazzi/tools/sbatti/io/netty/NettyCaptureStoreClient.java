@@ -1,76 +1,77 @@
 package net.caprazzi.tools.sbatti.io.netty;
 
-import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
-import net.caprazzi.tools.sbatti.io.Capture;
 import net.caprazzi.tools.sbatti.io.Capture.Captured;
 import net.caprazzi.tools.sbatti.io.Capture.CapturedReceipt;
+import net.caprazzi.tools.sbatti.io.core.logging.Log;
 
 import org.jboss.netty.bootstrap.ClientBootstrap;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
-import org.joda.time.Instant;
-
-import com.google.common.base.Charsets;
-import com.google.protobuf.ByteString;
 
 public class NettyCaptureStoreClient {
-	
-	private InetAddress host;
-	private int port;
+
+	private static final Log log = Log.forClass(NettyCaptureStoreClient.class);
+
+	private InetSocketAddress address;
+
 	private NettyCaptureStoreClientHandler handler;
-	
-	public NettyCaptureStoreClient(InetAddress host, int port) {
-		this.host = host;
-		this.port = port;
+
+	public NettyCaptureStoreClient(InetAddress host, int port) {		
+		address = new InetSocketAddress(host, port);	
 	}
 
 	public void start() {
-		
-		 ClientBootstrap bootstrap = new ClientBootstrap(
-			 new NioClientSocketChannelFactory(
+		log.info("Client connecting to {}", address);
+
+		final ClientBootstrap bootstrap = new ClientBootstrap(
+			new NioClientSocketChannelFactory(
 				Executors.newCachedThreadPool(),
-                Executors.newCachedThreadPool()));
-		 
-		 bootstrap.setPipelineFactory(new NettyCaptureStoreClientPipelineFactory());
-		 
-		 ChannelFuture connectFuture =
-				 bootstrap.connect(new InetSocketAddress(host, port));
-		 
-		 Channel channel =
-				connectFuture.awaitUninterruptibly().getChannel();
-		 
-		 handler = channel.getPipeline().get(NettyCaptureStoreClientHandler.class);		 
+				Executors.newCachedThreadPool()));
+
+		NettyCaptureStoreReconnectStrategy strategy 
+			= new NettyCaptureStoreReconnectStrategy(5, TimeUnit.SECONDS);
+		
+		bootstrap.setPipelineFactory(
+			new NettyCaptureStoreClientPipelineFactory(
+					bootstrap, 
+					strategy,
+					this));
+
+			
+		bootstrap.setOption("remoteAddress", address);		
+		
+		bootstrap.setOption("child.tcpNoDelay", true);
+        bootstrap.setOption("child.keepAlive", true);
+        
+		bootstrap.connect(address);
 	}
 	
-	public static void main(String[] args) throws UnknownHostException, UnsupportedEncodingException {
-		NettyCaptureStoreClient client 
-			= new NettyCaptureStoreClient(InetAddress.getLocalHost(), 3333);
-		
-		client.start();
-		
-		for(;;) {
-			CapturedReceipt receipt = client.send(Capture.Captured.newBuilder()
-					.setId("zzzzzz")
-					.setData(ByteString.copyFrom("payload", Charsets.UTF_8.toString()))
-					.setSender("client")
-					.setTimestamp(Instant.now().getMillis())
-					.build());
-			
-			System.out.println("Receipt: " + receipt);
-		}
+	public boolean isConnected() {
+		return handler != null && handler.isConnected();
 	}
 
 	public CapturedReceipt send(Captured captured) {
-		System.out.println("Sending " + captured);
-		return handler.sendCapture(captured);		
+		log.info("Sending " + captured);
+		return handler.sendCapture(captured);
 	}
 	
-	
-	
+	@Override
+	public String toString() {
+		return this.getClass().getSimpleName() + "/" + address;
+	}
+
+	public InetSocketAddress getAddress() {
+		return address;
+	}
+
+	public void setHandler(
+			NettyCaptureStoreClientHandler handler) {
+				this.handler = handler;
+		
+	}
+
 }
