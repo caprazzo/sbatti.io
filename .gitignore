@@ -165,3 +165,5 @@ pip-log.txt
 .DS_Store
 
 *.class
+
+target/classes/net/caprazzi/tools/sbatti/io/netty/SimpleNettyProtobufClient.class
