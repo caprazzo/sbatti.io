@@ -17,7 +17,7 @@ import org.joda.time.Instant;
 
 import com.google.protobuf.MessageLite;
 
-public class SimpleNettyProtobufServerHandler
+public abstract class SimpleNettyProtobufServerHandler
 	<TReceive extends MessageLite, TSend extends MessageLite> 
 		extends SimpleChannelUpstreamHandler {
 
@@ -32,12 +32,16 @@ public class SimpleNettyProtobufServerHandler
 		}
 		super.handleUpstream(ctx, e);
 	}
+	 
 	
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e)
 			throws Exception {
 		
 		TReceive captured = (TReceive) e.getMessage();
+		
+		
+		TSend response = processMessage(e.getMessage());
 		
 		System.out.println("Received " + captured);
 		
@@ -48,6 +52,9 @@ public class SimpleNettyProtobufServerHandler
 				.setSuccess(true));		
 	}
 	
+	protected abstract TSend processMessage(TReceive message);
+
+
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) {
 		Log.log(
