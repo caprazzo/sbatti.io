@@ -1,79 +1,83 @@
 package net.caprazzi.tools.sbatti.io;
 
-import com.google.common.util.concurrent.FutureCallback;
+import net.caprazzi.tools.sbatti.io.core.logging.Log;
+import net.caprazzi.tools.sbatti.io.messageQueue.DataMessage;
+import net.caprazzi.tools.sbatti.io.messageQueue.DataMessageReceipt;
+import net.caprazzi.tools.sbatti.io.messageQueue.DataMessageStore;
+
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
-public class StoreCopyMarkStoreHandler<TData> implements CaptureStore<TData> {
+public class StoreCopyMarkStoreHandler<TData> implements DataMessageStore<TData> {
 	
-	private static interface ReceiptCallback<TData>
-		extends FutureCallback<CaptureStoreReceipt<TData>> {}
+	private static final Log log = Log
+			.forClass(StoreCopyMarkStoreHandler.class);
 	
-	private CaptureStore<TData> firstStore;
-	private CaptureStore<TData> secondStore;
+	private DataMessageStore<TData> firstStore;
+	private DataMessageStore<TData> secondStore;
 
-	public StoreCopyMarkStoreHandler(CaptureStore<TData> firstStore, CaptureStore<TData> secondStore) {
+	public StoreCopyMarkStoreHandler(DataMessageStore<TData> firstStore, DataMessageStore<TData> secondStore) {
 		this.firstStore = firstStore;
 		this.secondStore = secondStore;
 	}
 	
-	public ListenableFuture<CaptureStoreReceipt<TData>> store(String sender, CapturedData<TData> capture) {
+	public ListenableFuture<DataMessageReceipt> store(String sender, final DataMessage<TData> capture) {
 		
-		System.out.println("STORE " + capture);
-		ListenableFuture<CaptureStoreReceipt<TData>> tryFirstStore = firstStore.store(sender, capture);
+		log.debug("{}: Storing to first store {} (from {})", capture.getId(), firstStore, sender);
 		
-		Futures.addCallback(tryFirstStore, new ReceiptCallback<TData>() {
-
+		ListenableFuture<DataMessageReceipt> tryFirstStore = firstStore.store(this.toString(), capture);
+		
+		Futures.addCallback(tryFirstStore, new ReceiptCallback() {
 			@Override
-			public void onSuccess(CaptureStoreReceipt<TData> result) {				
-				storeToSecond(result);				
+			public void onComplete(DataMessageReceipt receipt) {
+				if (!receipt.isSuccess()) {
+					log.warn("{}: Failed to store to first store {}: {}", receipt.getCaptureId(),  firstStore, receipt);
+				}
+				else {
+					log.debug("{}: Succesfully stored to first store {}", receipt.getCaptureId(), firstStore);
+					storeToSecond(capture);
+				}
 			}
-
-			@Override
-			public void onFailure(Throwable t) {
-				t.printStackTrace();
-				// TODO log and propagate			
-			}
-			
 		});
 		
 		return tryFirstStore;		
 	}
 	
-	private void confirmToFirstStore(CaptureStoreReceipt<TData> result) {
+	private void confirmToFirstStore(DataMessageReceipt result) {
 		firstStore.confirm(result);
 	}
 	
-	private void storeToSecond(CaptureStoreReceipt<TData> result) {
-		System.out.println("STORE TO SECOND " + result);
-		ListenableFuture<CaptureStoreReceipt<TData>> trySecondStore
+	private void storeToSecond(final DataMessage<TData> capture) {
+		
+		log.debug("{}: Storing to second store {}", capture.getId(), secondStore);
+		
+		ListenableFuture<DataMessageReceipt> trySecondStore
 			= secondStore.store(
 				"second-store", 
-				result.getCapture());
+				capture);
 		
-		Futures.addCallback(trySecondStore, new ReceiptCallback<TData>() {
-
+		Futures.addCallback(trySecondStore, new ReceiptCallback() {
 			@Override
-			public void onSuccess(CaptureStoreReceipt<TData> result) {
-				System.out.println("CONFIRM TO FIRST " + result);
-				confirmToFirstStore(result);			
+			public void onComplete(DataMessageReceipt receipt) {
+				if (!receipt.isSuccess()) { 
+					log.warn("{}: Failed to store to second store {}: {}", receipt.getCaptureId(),  secondStore, receipt);
+				}				
+				else {
+					log.debug("{}: Succesfully stored to second store {}", receipt.getCaptureId(), secondStore);
+					confirmToFirstStore(receipt);
+				}				
 			}
-
-			@Override
-			public void onFailure(Throwable t) {
-				t.printStackTrace();		
-			}
-			
 		});
 	}
 
 	@Override
-	public void confirm(CaptureStoreReceipt<TData> receipt) {
-		// TODO Auto-generated method stub
+	public void confirm(DataMessageReceipt receipt) {
 		
 	}
 	
-	
-	
+	@Override
+	public String toString() {
+		return "store-copy( " + firstStore +" => "+ secondStore + " )";
+	}	
 	
 }

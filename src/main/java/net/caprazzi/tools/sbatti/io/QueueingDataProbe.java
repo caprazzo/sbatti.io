@@ -3,23 +3,36 @@ package net.caprazzi.tools.sbatti.io;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class QueueingDataProbe<TData> implements IDataProbe<TData> {
+import net.caprazzi.tools.sbatti.io.messageQueue.DataMessage;
 
-	private final BlockingQueue<CapturedData<TData>> queue
-		= new LinkedBlockingQueue<CapturedData<TData>>();
+public class QueueingDataProbe<TData> implements MessageCollector<TData> {
+
+	private final BlockingQueue<DataMessage<TData>> queue
+		= new LinkedBlockingQueue<DataMessage<TData>>();
+	
+	private String name;
 		
+	public QueueingDataProbe(String name) {
+		this.name = name;
+	}
+	
 	@Override
-	public void capture(TData data) {
+	public void collect(DataMessage<TData> capture) {
 		try {
-			queue.put(CapturedData.forData(data));
+			queue.put(capture);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
-	public BlockingQueue<CapturedData<TData>> getQueue() {
+	public BlockingQueue<DataMessage<TData>> getQueue() {
 		return queue;
+	}
+	
+	@Override
+	public String toString() {
+		return "QDP:" + name;
 	}
 	
 }

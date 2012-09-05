@@ -1,15 +1,12 @@
 package net.caprazzi.tools.sbatti.io.example;
 
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class InterestingObject {
 
 	private final int id;
 	
-	private static AtomicInteger counter = new AtomicInteger();
-	
-	public static InterestingObject newObject() {
-		return new InterestingObject(counter.incrementAndGet());
+	public static InterestingObject fromInt(int id) {
+		return new InterestingObject(id);
 	}
 	
 	private InterestingObject(int id) {

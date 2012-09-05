@@ -1,6 +1,7 @@
 package net.caprazzi.tools.sbatti.io.example;
 
-import net.caprazzi.tools.sbatti.io.IDataProbe;
+import net.caprazzi.tools.sbatti.io.MessageCollector;
+import net.caprazzi.tools.sbatti.io.messageQueue.DataMessage;
 
 import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomains;
@@ -8,10 +9,10 @@ import com.google.common.collect.Ranges;
 
 public class InterestingObjectGenerator {
 
-	private final IDataProbe<InterestingObject> probe;
+	private final MessageCollector<InterestingObject> probe;
 	private final int num;
 
-	public InterestingObjectGenerator(IDataProbe<InterestingObject> probe, int num) {
+	public InterestingObjectGenerator(MessageCollector<InterestingObject> probe, int num) {
 		this.probe = probe;
 		this.num = num;
 	}
@@ -26,7 +27,7 @@ public class InterestingObjectGenerator {
 						.asSet(DiscreteDomains.integers());
 				
 				for (int r : set) {			
-					probe.capture(InterestingObject.newObject());			
+					probe.collect(DataMessage.forData(InterestingObject.fromInt(r)));		
 				}				
 			}
 			
